@@ -8,6 +8,7 @@ using System.Net.Mail;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using EmailService.Models;
 using EmailService.Services;
 
 namespace EmailService
@@ -28,13 +29,12 @@ namespace EmailService
             eventLog1.Log = "MyNewLog";
         }
 
-        protected override async void OnStart(string[] args)
+        public async void SendFive(int from,int count)
         {
-            eventLog1.WriteEntry("In OnStart");
             TaskService ts = new TaskService();
-            var tasks = await ts.GetAll();
             string s = "Tasks form database: \n";
-            foreach (var task in tasks)
+            var t = await ts.GetAll(from * 5, count);
+            foreach (var task in t)
             {
                 s += "{ TaskId: " + task.TaskId + ", Name: " + task.Name + ", Day: " + task.Day;
                 if (task.User != null)
@@ -67,6 +67,37 @@ namespace EmailService
 
             client.Send(mail);
             eventLog1.WriteEntry("Email Sent");
+        }
+
+        protected override async void OnStart(string[] args)
+        {
+            System.Diagnostics.Debugger.Launch();
+
+            eventLog1.WriteEntry("In OnStart");
+            try
+            {
+                TaskService ts = new TaskService();
+
+                int count = ts.GetCount();
+                int operations = (int) (count / 5);
+                int last = (int) (count % 5);
+
+                for (int i = 0; i < operations; i++)
+                {
+                    SendFive(i,5);
+                }
+
+                if (last != 0)
+                {
+                    SendFive(operations,last);
+                }
+            }
+            catch (Exception e)
+            {
+                eventLog1.WriteEntry(e.Message);
+            }
+            //var tasks = await ts.GetAll();
+    
         }
 
         protected override void OnStop()

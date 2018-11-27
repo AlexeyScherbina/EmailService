@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using EmailService.Models;
 
@@ -14,9 +15,14 @@ namespace EmailService.Services
             db = new ApplicationDbContext();
         }
 
-        public async Task<IEnumerable<Tasks>> GetAll()
+        public int GetCount()
         {
-            var tasks = await db.Tasks.ToListAsync();
+            return db.Tasks.Count();
+        }
+
+        public async Task<IEnumerable<Tasks>> GetAll(int from, int count)
+        {
+            var tasks = await db.Tasks.AsQueryable().OrderByDescending(x => x.TaskId).Skip(from).Take(count).ToListAsync();
             return tasks;
         }
     }
