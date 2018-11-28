@@ -30,7 +30,7 @@ namespace EmailService
             eventLog.Log = "MyNewLog";
         }
 
-        public async void SendFive(int from,int count)
+        public async Task SendFive(int from,int count)
         {
             TaskService ts = new TaskService();
             string s = "Tasks form database: \n";
@@ -79,25 +79,23 @@ namespace EmailService
 
                 int perMessage = 3;
                 int count = ts.GetCount();
-                int operations = (int) (count / perMessage);
-                int last = (int) (count % perMessage);
+                int operations = count / perMessage;
+                int last = count % perMessage;
                 int num = last == 0 ? operations : operations+1;
                 Task[] tasks = new Task[num];
                 for (int i = 0; i < operations; i++)
                 {
                     int n = i;
-                    tasks[i] = new Task(()=>SendFive(n*perMessage, perMessage));
+                    tasks[i] =  Task.Run(() => SendFive(n * perMessage, perMessage));
                 }
 
                 if (last != 0)
                 {
-                    tasks[operations] = new Task(()=>SendFive(operations*perMessage,last));
+                    tasks[operations] =  Task.Run(() => SendFive(operations * perMessage, last));
                 }
 
-                foreach (var t in tasks)
-                {
-                    t.Start();
-                }
+                await Task.WhenAll(tasks);
+                eventLog.WriteEntry("All emails sent");
             }
             catch (Exception e)
             {
