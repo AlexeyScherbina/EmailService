@@ -34,7 +34,7 @@ namespace EmailService
         {
             TaskService ts = new TaskService();
             string s = "Tasks form database: \n";
-            var t = await ts.GetAll(from * 5, count);
+            var t = await ts.GetAll(from, count);
             Object thisLoc = new Object();
             Parallel.ForEach(t, (task) =>
             {
@@ -49,7 +49,6 @@ namespace EmailService
                     s += " }  " + Environment.NewLine;
                 }
             });
-
 
             System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage();
             mail.To.Add(ConfigurationManager.AppSettings["ToMail"]);
@@ -67,7 +66,7 @@ namespace EmailService
             client.EnableSsl = true;
 
             client.Send(mail);
-            eventLog.WriteEntry("Email Sent");
+            eventLog.WriteEntry($"Email Sent! From: {from} to {from+count}");
         }
 
         protected override async void OnStart(string[] args)
@@ -78,18 +77,26 @@ namespace EmailService
             {
                 TaskService ts = new TaskService();
 
+                int perMessage = 3;
                 int count = ts.GetCount();
-                int operations = (int) (count / 5);
-                int last = (int) (count % 5);
-
+                int operations = (int) (count / perMessage);
+                int last = (int) (count % perMessage);
+                int num = last == 0 ? operations : operations+1;
+                Task[] tasks = new Task[num];
                 for (int i = 0; i < operations; i++)
                 {
-                    SendFive(i,5);
+                    int n = i;
+                    tasks[i] = new Task(()=>SendFive(n*perMessage, perMessage));
                 }
 
                 if (last != 0)
                 {
-                    SendFive(operations,last);
+                    tasks[operations] = new Task(()=>SendFive(operations*perMessage,last));
+                }
+
+                foreach (var t in tasks)
+                {
+                    t.Start();
                 }
             }
             catch (Exception e)
