@@ -5,6 +5,14 @@ namespace EmailService.Models
 {
     public class User
     {
+        public User()
+        {
+            if (Tasks == null)
+            {
+                Tasks = new List<Tasks>();
+            }
+        }
+
         [Key]
         public int UserId { get; set; }
 

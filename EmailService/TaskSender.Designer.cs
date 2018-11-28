@@ -28,22 +28,22 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.eventLog1 = new System.Diagnostics.EventLog();
-            ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).BeginInit();
+            this.eventLog = new System.Diagnostics.EventLog();
+            ((System.ComponentModel.ISupportInitialize)(this.eventLog)).BeginInit();
             // 
-            // eventLog1
+            // eventLog
             // 
-            this.eventLog1.EntryWritten += new System.Diagnostics.EntryWrittenEventHandler(this.eventLog1_EntryWritten);
+            this.eventLog.EntryWritten += new System.Diagnostics.EntryWrittenEventHandler(this.eventLog_EntryWritten);
             // 
             // TaskSender
             // 
             this.ServiceName = "Service1";
-            ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.eventLog)).EndInit();
 
         }
 
         #endregion
 
-        private System.Diagnostics.EventLog eventLog1;
+        private System.Diagnostics.EventLog eventLog;
     }
 }

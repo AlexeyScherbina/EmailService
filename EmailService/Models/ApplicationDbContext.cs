@@ -3,7 +3,6 @@ using System.Configuration;
 
 namespace EmailService.Models
 {
-    //ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString()
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext()
