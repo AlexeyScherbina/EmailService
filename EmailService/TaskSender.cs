@@ -35,15 +35,20 @@ namespace EmailService
             TaskService ts = new TaskService();
             string s = "Tasks form database: \n";
             var t = await ts.GetAll(from * 5, count);
-            foreach (var task in t)
+            Object thisLoc = new Object();
+            Parallel.ForEach(t, (task) =>
             {
-                s += $"{{ TaskId: {task.TaskId}, Name: {task.Name}, Day: {task.Day}";
-                if (task.User != null)
+                lock (thisLoc)
                 {
-                    s += $", User: {task.User.FullName}";
+                    s += $"{{ TaskId: {task.TaskId}, Name: {task.Name}, Day: {task.Day}";
+                    if (task.User != null)
+                    {
+                        s += $", User: {task.User.FullName}";
+                    }
+
+                    s += " }  " + Environment.NewLine;
                 }
-                s += " }  " + Environment.NewLine;
-            }
+            });
 
 
             System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage();
@@ -67,6 +72,7 @@ namespace EmailService
 
         protected override async void OnStart(string[] args)
         {
+            System.Diagnostics.Debugger.Launch();
             eventLog.WriteEntry("In OnStart");
             try
             {
